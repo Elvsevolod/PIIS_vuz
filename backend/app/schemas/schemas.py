@@ -225,3 +225,47 @@ class TeacherAssignmentValidationResponse(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+# --- Diploma Work Schemas ---
+class DiplomaWorkCreate(BaseModel):
+    student_id: int
+    title: str
+    supervisor_id: int
+
+class DiplomaWorkResponse(BaseModel):
+    student_id: int
+    student_name: str
+    title: str
+    supervisor_id: int
+    supervisor_name: str
+
+    class Config:
+        from_attributes = True
+
+
+# --- Attestation Schemas ---
+class AttestationCreate(BaseModel):
+    student_id: int
+    study_plan_element_id: int
+    grade_id: int
+
+class AttestationResponse(BaseModel):
+    id: int
+    student_id: int
+    student_name: str
+    study_plan_element_id: int
+    grade_id: int
+    grade_value: str
+    date_assigned: str
+
+    class Config:
+        from_attributes = True
+
+class AcceptableGradeResponse(BaseModel):
+    id: int
+    value: str
+    control_form_id: int
+
+    class Config:
+        from_attributes = True
