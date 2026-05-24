@@ -69,15 +69,14 @@ class LoginView(ft.Container):
                         value="ИС ВУЗа",
                         size=28,
                         weight=ft.FontWeight.BOLD,
-                        color=ft.colors.WHITE,
-                        letter_spacing=1.5
+                        color=ft.colors.WHITE
                     ),
                     ft.Text(
                         value="Управление учебным процессом",
                         size=12,
-                        color=ft.colors.WHITE70,
-                        margin=ft.margin.only(bottom=20)
+                        color=ft.colors.WHITE70
                     ),
+                    ft.Container(height=20),
                     self.username_input,
                     ft.Container(height=5),
                     self.password_input,

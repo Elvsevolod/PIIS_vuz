@@ -47,4 +47,5 @@ def main(page: ft.Page):
     show_login()
 
 if __name__ == "__main__":
-    ft.app(target=main)
+    # To run as desktop, change view to ft.AppView.FLET_APP (or omit view and port)
+    ft.app(target=main, view=ft.AppView.WEB_BROWSER, port=8500)

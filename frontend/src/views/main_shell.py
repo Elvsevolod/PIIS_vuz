@@ -94,25 +94,45 @@ class MainShell(ft.Row):
         
         # Admin section (Admin only)
         if self.role == "admin":
-            sidebar_items.append(ft.Text("АДМИНИСТРИРОВАНИЕ", size=11, color=ft.colors.WHITE38, weight=ft.FontWeight.BOLD, margin=ft.margin.only(top=15, left=10, bottom=5)))
+            sidebar_items.append(
+                ft.Container(
+                    content=ft.Text("АДМИНИСТРИРОВАНИЕ", size=11, color=ft.colors.WHITE38, weight=ft.FontWeight.BOLD),
+                    margin=ft.margin.only(top=15, left=10, bottom=5)
+                )
+            )
             sidebar_items.append(self.create_nav_item("📁 Справочники", ft.icons.FOLDER_ROUNDED, "admin_directories"))
             sidebar_items.append(self.create_nav_item("👥 Пользователи", ft.icons.PEOPLE_ROUNDED, "admin_users"))
             
         # Dean section (Dean or Admin)
         if self.role in ["admin", "dean"]:
-            sidebar_items.append(ft.Text("ДЕКАНАТ", size=11, color=ft.colors.WHITE38, weight=ft.FontWeight.BOLD, margin=ft.margin.only(top=15, left=10, bottom=5)))
+            sidebar_items.append(
+                ft.Container(
+                    content=ft.Text("ДЕКАНАТ", size=11, color=ft.colors.WHITE38, weight=ft.FontWeight.BOLD),
+                    margin=ft.margin.only(top=15, left=10, bottom=5)
+                )
+            )
             sidebar_items.append(self.create_nav_item("📅 Учебные планы", ft.icons.PLAYLIST_ADD_CHECK_ROUNDED, "dean_plans"))
             sidebar_items.append(self.create_nav_item("👨‍🎓 Группы и студенты", ft.icons.SCHOOL_ROUNDED, "dean_students"))
             
         # Zavkhaf section (Department Head or Admin)
         if self.role in ["admin", "department_head"]:
-            sidebar_items.append(ft.Text("КАФЕДРА", size=11, color=ft.colors.WHITE38, weight=ft.FontWeight.BOLD, margin=ft.margin.only(top=15, left=10, bottom=5)))
+            sidebar_items.append(
+                ft.Container(
+                    content=ft.Text("КАФЕДРА", size=11, color=ft.colors.WHITE38, weight=ft.FontWeight.BOLD),
+                    margin=ft.margin.only(top=15, left=10, bottom=5)
+                )
+            )
             sidebar_items.append(self.create_nav_item("💼 Распределение нагрузки", ft.icons.ASSIGNMENT_IND_ROUNDED, "dept_load"))
             sidebar_items.append(self.create_nav_item("🎓 Дипломные работы", ft.icons.ASSIGNMENT_ROUNDED, "dept_diplomas"))
             
         # Teacher section (Teacher or Admin)
         if self.role in ["admin", "teacher"]:
-            sidebar_items.append(ft.Text("ПРЕПОДАВАТЕЛЬ", size=11, color=ft.colors.WHITE38, weight=ft.FontWeight.BOLD, margin=ft.margin.only(top=15, left=10, bottom=5)))
+            sidebar_items.append(
+                ft.Container(
+                    content=ft.Text("ПРЕПОДАВАТЕЛЬ", size=11, color=ft.colors.WHITE38, weight=ft.FontWeight.BOLD),
+                    margin=ft.margin.only(top=15, left=10, bottom=5)
+                )
+            )
             sidebar_items.append(self.create_nav_item("📝 Моя нагрузка", ft.icons.TASK_ROUNDED, "teacher_load"))
             sidebar_items.append(self.create_nav_item("📊 Аттестация", ft.icons.GRADING_ROUNDED, "teacher_grades"))
             
