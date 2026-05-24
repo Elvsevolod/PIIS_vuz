@@ -1,8 +1,8 @@
-version: '3.8'
+name: piis
 
 services:
   db:
-    image: postgres:15-alpine
+    image: postgres:17-alpine
     container_name: uis_postgres
     restart: always
     environment:
