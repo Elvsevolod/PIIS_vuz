@@ -1,5 +1,8 @@
 import flet as ft
 from api_client import api_client
+from views.dean_students_view import DeanStudentsView
+from views.dean_plans_view import DeanPlansView
+from views.dept_load_view import DeptLoadView
 
 class MainShell(ft.Row):
     def __init__(self, page: ft.Page, on_logout):
@@ -221,6 +224,12 @@ class MainShell(ft.Row):
         # Load appropriate view
         if key == "overview":
             self.content_container.content = self.get_welcome_view()
+        elif key == "dean_students":
+            self.content_container.content = DeanStudentsView(self.page)
+        elif key == "dean_plans":
+            self.content_container.content = DeanPlansView(self.page)
+        elif key == "dept_load":
+            self.content_container.content = DeptLoadView(self.page)
         else:
             # Placeholder for future views
             self.content_container.content = ft.Container(

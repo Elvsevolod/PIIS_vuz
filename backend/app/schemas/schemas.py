@@ -95,3 +95,133 @@ class TeacherMetadataResponse(BaseModel):
     degrees: List[IDNamePair]
     titles: List[IDNamePair]
     departments: List[IDNamePair]
+
+
+# --- Group Schemas ---
+class GroupCreate(BaseModel):
+    name: str
+    course: int
+    semester: int
+    faculty_id: int
+    admission_year: int
+
+class GroupResponse(BaseModel):
+    id: int
+    name: str
+    course: int
+    semester: int
+    faculty_id: int
+    faculty_name: Optional[str] = None
+    admission_year: int
+
+    class Config:
+        from_attributes = True
+
+
+# --- Student Schemas ---
+class StudentCreate(BaseModel):
+    full_name: str
+    group_id: Optional[int] = None
+    gradebook_number: str
+
+class StudentResponse(BaseModel):
+    id: int
+    full_name: str
+    group_id: Optional[int] = None
+    group_name: Optional[str] = None
+    gradebook_number: str
+
+    class Config:
+        from_attributes = True
+
+
+# --- Discipline Schemas ---
+class DisciplineCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+
+class DisciplineResponse(BaseModel):
+    id: int
+    name: str
+    description: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+# --- Study Plan Element Schemas ---
+class StudyPlanElementCreate(BaseModel):
+    group_id: int
+    discipline_id: int
+    class_type_id: int
+    course: int
+    semester: int
+    hours: int
+    control_form_id: int
+
+class StudyPlanElementResponse(BaseModel):
+    id: int
+    group_id: int
+    group_name: Optional[str] = None
+    discipline_id: int
+    discipline_name: Optional[str] = None
+    class_type_id: int
+    class_type_name: Optional[str] = None
+    course: int
+    semester: int
+    hours: int
+    control_form_id: int
+    control_form_name: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+# --- Department Assignment Schemas ---
+class DepartmentAssignmentCreate(BaseModel):
+    department_id: int
+    study_plan_element_id: int
+
+class DepartmentAssignmentResponse(BaseModel):
+    id: int
+    department_id: int
+    department_name: Optional[str] = None
+    study_plan_element_id: int
+    study_plan_element_discipline: Optional[str] = None
+    study_plan_element_group: Optional[str] = None
+    study_plan_element_hours: Optional[int] = None
+    study_plan_element_class_type: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+# --- Teacher Load Schemas ---
+class TeacherLoadCreate(BaseModel):
+    teacher_id: int
+    assignment_id: int
+
+class TeacherLoadResponse(BaseModel):
+    id: int
+    teacher_id: int
+    teacher_name: str
+    assignment_id: int
+    discipline_name: str
+    class_type_name: str
+    hours: int
+    semester: int
+
+    class Config:
+        from_attributes = True
+
+class TeacherAssignmentValidationResponse(BaseModel):
+    id: int
+    full_name: str
+    category_name: str
+    title_name: str
+    current_load_hours: int
+    can_assign: bool
+    reason: Optional[str] = None
+
+    class Config:
+        from_attributes = True

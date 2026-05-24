@@ -5,7 +5,7 @@ from sqlalchemy.exc import OperationalError
 
 from app.core.database import engine, Base, SessionLocal
 from app.core.seed import seed_db
-from app.api.endpoints import auth, faculties, departments, teachers
+from app.api.endpoints import auth, faculties, departments, teachers, students, plans, load
 
 # Try to connect to the database with a retry loop (handles PostgreSQL startup delay)
 max_retries = 10
@@ -52,6 +52,9 @@ app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(faculties.router, prefix="/api/v1/faculties", tags=["faculties"])
 app.include_router(departments.router, prefix="/api/v1/departments", tags=["departments"])
 app.include_router(teachers.router, prefix="/api/v1/teachers", tags=["teachers"])
+app.include_router(students.router, prefix="/api/v1/students", tags=["students"])
+app.include_router(plans.router, prefix="/api/v1/plans", tags=["plans"])
+app.include_router(load.router, prefix="/api/v1/load", tags=["load"])
 
 @app.get("/")
 def read_root():
