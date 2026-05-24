@@ -1,8 +1,6 @@
 from sqlalchemy.orm import Session
 from app.models.models import TeacherCategory, AcademicDegree, AcademicTitle, ClassType, ControlForm, AcceptableGrade, User
-from passlib.context import CryptContext
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+from app.core.security import get_password_hash
 
 def seed_db(db: Session):
     # 1. Teacher Categories
@@ -56,7 +54,7 @@ def seed_db(db: Session):
             
     # 6. Default Admin User
     if not db.query(User).filter_by(username="admin").first():
-        hashed = pwd_context.hash("admin123")
+        hashed = get_password_hash("admin123")
         db.add(User(username="admin", hashed_password=hashed, role="admin"))
         
     db.commit()
