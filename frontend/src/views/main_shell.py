@@ -40,7 +40,7 @@ class MainShell(ft.Row):
                             ft.Text(
                                 value=f"{self.username} ({self.get_role_display(self.role)})",
                                 size=14,
-                                color=ft.colors.WHITE87,
+                                color=ft.colors.WHITE70,
                                 weight=ft.FontWeight.W_500
                             ),
                         ],
@@ -150,7 +150,7 @@ class MainShell(ft.Row):
                 padding=ft.padding.all(12),
                 border_radius=8,
                 on_click=self.handle_logout,
-                hover_style=ft.ButtonStyle(bgcolor=ft.colors.WHITE10),
+                on_hover=self.on_hover_btn,
                 margin=ft.margin.only(bottom=15)
             )
         )
@@ -185,10 +185,25 @@ class MainShell(ft.Row):
             border_radius=8,
             bgcolor=bg_color,
             on_click=lambda e: self.navigate_to(key, text),
-            hover_style=ft.ButtonStyle(bgcolor=ft.colors.WHITE10),
+            on_hover=self.on_hover_nav,
             data=key
         )
         return nav_item
+
+    def on_hover_btn(self, e):
+        e.control.bgcolor = ft.colors.WHITE10 if e.data == "true" else ft.colors.TRANSPARENT
+        e.control.update()
+
+    def on_hover_nav(self, e):
+        if e.data == "true":
+            e.control.bgcolor = ft.colors.WHITE10
+        else:
+            is_active = False
+            if isinstance(e.control.content, ft.Row) and len(e.control.content.controls) >= 2:
+                is_active = (e.control.content.controls[1].color == ft.colors.INDIGO_300)
+            if not is_active:
+                e.control.bgcolor = ft.colors.TRANSPARENT
+        e.control.update()
 
     def navigate_to(self, key: str, title: str):
         # Update active state in sidebar
