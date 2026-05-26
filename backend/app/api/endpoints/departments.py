@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
+from sqlalchemy.exc import IntegrityError
+from psycopg2.errors import ForeignKeyViolation
 
 from app.core.database import get_db
 from app.api.deps import check_admin, get_current_user
@@ -61,6 +63,13 @@ def delete_department(
     if not dept:
         raise HTTPException(status_code=404, detail="Department not found.")
     
-    db.delete(dept)
-    db.commit()
+    try:
+        db.delete(dept)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot delete department: it has related teachers or assignments. Remove them first."
+        )
     return

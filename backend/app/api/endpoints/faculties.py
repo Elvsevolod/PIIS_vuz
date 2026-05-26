@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
+from sqlalchemy.exc import IntegrityError
+from psycopg2.errors import ForeignKeyViolation
 
 from app.core.database import get_db
 from app.api.deps import check_admin, get_current_user
@@ -39,6 +41,13 @@ def delete_faculty(
     if not faculty:
         raise HTTPException(status_code=404, detail="Faculty not found.")
     
-    db.delete(faculty)
-    db.commit()
+    try:
+        db.delete(faculty)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot delete faculty: it has related departments, groups, or deans. Remove them first."
+        )
     return

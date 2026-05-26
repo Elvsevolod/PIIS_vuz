@@ -117,10 +117,8 @@ class TeacherGradesView(ft.Container):
                         ft.dropdown.Option(text=t["full_name"], key=str(t["id"])) for t in self.teachers
                     ]
                     if self.teachers:
-                        # Find Ivan Ivanov (our Professor assigned in Sprint 3)
-                        ivan = next((t for t in self.teachers if "Иван" in t["full_name"]), self.teachers[0])
-                        self.teacher_dropdown.value = str(ivan["id"])
-                        self.selected_teacher_id = ivan["id"]
+                        self.teacher_dropdown.value = str(self.teachers[0]["id"])
+                        self.selected_teacher_id = self.teachers[0]["id"]
             else:
                 # If logged in as teacher, use their linked teacher ID
                 self.selected_teacher_id = api_client.current_user.get("linked_entity_id")

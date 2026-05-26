@@ -28,19 +28,17 @@ def seed_db(db: Session):
             db.add(ClassType(name=cl))
             
     # 5. Control Forms & Grades
-    db.commit() # Flush first to get IDs if needed
-    
     exam_form = db.query(ControlForm).filter_by(name="экзамен").first()
     if not exam_form:
         exam_form = ControlForm(name="экзамен")
         db.add(exam_form)
-        db.commit()
+        db.flush()
         
     zachet_form = db.query(ControlForm).filter_by(name="зачет").first()
     if not zachet_form:
         zachet_form = ControlForm(name="зачет")
         db.add(zachet_form)
-        db.commit()
+        db.flush()
         
     exam_grades = ["Отлично", "Хорошо", "Удовлетворительно", "Неудовлетворительно"]
     for eg in exam_grades:

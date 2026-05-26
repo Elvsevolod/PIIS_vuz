@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from psycopg2.errors import ForeignKeyViolation
 from typing import List, Dict, Any, Optional
 
 from app.core.database import get_db
 from app.models.models import Discipline, StudyPlanElement, DepartmentAssignment, Group, ClassType, ControlForm, Department
 from app.schemas.schemas import DisciplineCreate, DisciplineResponse, StudyPlanElementCreate, StudyPlanElementResponse, DepartmentAssignmentCreate, DepartmentAssignmentResponse
-from app.api.endpoints.auth import get_current_user
+from app.api.deps import get_current_user, check_dean
 
 router = APIRouter()
 
@@ -30,7 +32,7 @@ def list_disciplines(db: Session = Depends(get_db), current_user = Depends(get_c
     return [DisciplineResponse.from_orm(d) for d in disciplines]
 
 @router.post("/disciplines", response_model=DisciplineResponse, status_code=status.HTTP_201_CREATED)
-def create_discipline(discipline_in: DisciplineCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def create_discipline(discipline_in: DisciplineCreate, db: Session = Depends(get_db), current_user = Depends(check_dean)):
     existing = db.query(Discipline).filter(Discipline.name == discipline_in.name).first()
     if existing:
         raise HTTPException(status_code=400, detail="Discipline with this name already exists")
@@ -69,7 +71,7 @@ def list_study_plan_elements(group_id: int, db: Session = Depends(get_db), curre
     return results
 
 @router.post("/elements", response_model=StudyPlanElementResponse, status_code=status.HTTP_201_CREATED)
-def create_study_plan_element(element_in: StudyPlanElementCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def create_study_plan_element(element_in: StudyPlanElementCreate, db: Session = Depends(get_db), current_user = Depends(check_dean)):
     # Verify group, discipline, class_type, control_form exist
     group = db.query(Group).filter(Group.id == element_in.group_id).first()
     if not group:
@@ -129,12 +131,19 @@ def create_study_plan_element(element_in: StudyPlanElementCreate, db: Session = 
     )
 
 @router.delete("/elements/{element_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_study_plan_element(element_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def delete_study_plan_element(element_id: int, db: Session = Depends(get_db), current_user = Depends(check_dean)):
     element = db.query(StudyPlanElement).filter(StudyPlanElement.id == element_id).first()
     if not element:
         raise HTTPException(status_code=404, detail="Study plan element not found")
-    db.delete(element)
-    db.commit()
+    try:
+        db.delete(element)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot delete study plan element: it has related department assignments. Remove them first."
+        )
     return None
 
 
@@ -162,7 +171,7 @@ def list_department_assignments(department_id: Optional[int] = None, db: Session
     return results
 
 @router.post("/assignments", response_model=DepartmentAssignmentResponse, status_code=status.HTTP_201_CREATED)
-def create_department_assignment(assignment_in: DepartmentAssignmentCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def create_department_assignment(assignment_in: DepartmentAssignmentCreate, db: Session = Depends(get_db), current_user = Depends(check_dean)):
     # Verify department and study plan element exist
     department = db.query(Department).filter(Department.id == assignment_in.department_id).first()
     if not department:
@@ -202,10 +211,17 @@ def create_department_assignment(assignment_in: DepartmentAssignmentCreate, db: 
     )
 
 @router.delete("/assignments/{assignment_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_department_assignment(assignment_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def delete_department_assignment(assignment_id: int, db: Session = Depends(get_db), current_user = Depends(check_dean)):
     assignment = db.query(DepartmentAssignment).filter(DepartmentAssignment.id == assignment_id).first()
     if not assignment:
         raise HTTPException(status_code=404, detail="Department assignment not found")
-    db.delete(assignment)
-    db.commit()
+    try:
+        db.delete(assignment)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot delete department assignment: it has related teacher load records. Remove them first."
+        )
     return None

@@ -14,9 +14,13 @@ class DeptLoadView(ft.Container):
         self.teachers_validation = []
         self.selected_assignment = None
         
-        # We simulate the department of the logged in user or admin (department ID = 1)
-        # To make it dynamic, we can grab the department of the first assignment or just default to 1, or let user switch department if they are admin!
-        self.current_dept_id = 1
+        # Determine department ID from user context
+        role = api_client.current_user.get("role") if api_client.current_user else "guest"
+        linked_id = api_client.current_user.get("linked_entity_id") if api_client.current_user else None
+        if role == "department_head" and linked_id:
+            self.current_dept_id = linked_id
+        else:
+            self.current_dept_id = 1
         
         # UI controls
         self.assign_list = ft.Column(spacing=10, scroll=ft.ScrollMode.ADAPTIVE)

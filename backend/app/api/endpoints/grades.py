@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from psycopg2.errors import ForeignKeyViolation
 from typing import List, Optional
 from datetime import date
 
 from app.core.database import get_db
 from app.models.models import Student, Teacher, DiplomaWork, Attestation, StudyPlanElement, AcceptableGrade, ControlForm
 from app.schemas.schemas import DiplomaWorkCreate, DiplomaWorkResponse, AttestationCreate, AttestationResponse, AcceptableGradeResponse
-from app.api.endpoints.auth import get_current_user
+from app.api.deps import get_current_user, check_department_head, check_teacher_or_admin
 
 router = APIRouter()
 
@@ -38,7 +40,7 @@ def list_diploma_works(
 def assign_diploma_supervisor(
     diploma_in: DiplomaWorkCreate,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(check_department_head)
 ):
     student = db.query(Student).filter(Student.id == diploma_in.student_id).first()
     if not student:
@@ -85,14 +87,21 @@ def assign_diploma_supervisor(
 def delete_diploma_work(
     student_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(check_department_head)
 ):
     diploma = db.query(DiplomaWork).filter(DiplomaWork.student_id == student_id).first()
     if not diploma:
         raise HTTPException(status_code=404, detail="Дипломная работа не найдена.")
         
-    db.delete(diploma)
-    db.commit()
+    try:
+        db.delete(diploma)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot delete diploma work due to existing references."
+        )
     return None
 
 
@@ -141,7 +150,7 @@ def list_attestations(
 def assign_grade(
     attestation_in: AttestationCreate,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(check_teacher_or_admin)
 ):
     student = db.query(Student).filter(Student.id == attestation_in.student_id).first()
     if not student:

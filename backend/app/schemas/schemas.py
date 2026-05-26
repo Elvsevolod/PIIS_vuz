@@ -7,7 +7,7 @@ class Token(BaseModel):
     token_type: str
 
 class TokenPayload(BaseModel):
-    sub: Optional[str] = None
+    sub: str
 
 class UserLogin(BaseModel):
     username: str

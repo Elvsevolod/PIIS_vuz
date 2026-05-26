@@ -5,7 +5,7 @@ from sqlalchemy.exc import OperationalError
 
 from app.core.database import engine, Base, SessionLocal
 from app.core.seed import seed_db
-from app.api.endpoints import auth, faculties, departments, teachers, students, plans, load, grades
+from app.api.endpoints import auth, faculties, departments, teachers, students, plans, load, grades, reports
 
 # Try to connect to the database with a retry loop (handles PostgreSQL startup delay)
 max_retries = 10
@@ -42,7 +42,7 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -56,6 +56,7 @@ app.include_router(students.router, prefix="/api/v1/students", tags=["students"]
 app.include_router(plans.router, prefix="/api/v1/plans", tags=["plans"])
 app.include_router(load.router, prefix="/api/v1/load", tags=["load"])
 app.include_router(grades.router, prefix="/api/v1/grades", tags=["grades"])
+app.include_router(reports.router, prefix="/api/v1/reports", tags=["reports"])
 
 @app.get("/")
 def read_root():

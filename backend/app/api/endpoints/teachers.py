@@ -1,6 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException, status, Query
 from sqlalchemy.orm import Session
 from typing import List, Optional
+from sqlalchemy.exc import IntegrityError
+from psycopg2.errors import ForeignKeyViolation
 
 from app.core.database import get_db
 from app.api.deps import check_admin, get_current_user
@@ -112,6 +114,13 @@ def delete_teacher(
     if not teacher:
         raise HTTPException(status_code=404, detail="Teacher not found.")
         
-    db.delete(teacher)
-    db.commit()
+    try:
+        db.delete(teacher)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot delete teacher: they have assigned workload, diploma supervision, or user account. Remove those first."
+        )
     return

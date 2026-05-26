@@ -1,5 +1,5 @@
 import requests
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Tuple
 
 class APIClient:
     def __init__(self, base_url: str = "http://localhost:8000"):
@@ -20,7 +20,7 @@ class APIClient:
             headers["Authorization"] = f"Bearer {self.token}"
         return headers
 
-    def login(self, username: str, password: str) -> bool:
+    def login(self, username: str, password: str) -> Tuple[bool, str]:
         try:
             response = requests.post(
                 f"{self.base_url}/api/v1/auth/login",
@@ -30,10 +30,16 @@ class APIClient:
             if response.status_code == 200:
                 data = response.json()
                 self.set_token(data["access_token"])
-                return self.fetch_profile()
-            return False
-        except Exception:
-            return False
+                if self.fetch_profile():
+                    return True, ""
+                return False, "Не удалось загрузить профиль пользователя."
+            return False, "Неверное имя пользователя или пароль."
+        except requests.ConnectionError:
+            return False, "Не удалось подключиться к серверу. Проверьте, запущен ли backend."
+        except requests.Timeout:
+            return False, "Превышено время ожидания ответа от сервера."
+        except requests.RequestException as e:
+            return False, f"Ошибка сети: {str(e)}"
 
     def fetch_profile(self) -> bool:
         if not self.token:

@@ -38,3 +38,30 @@ def check_admin(current_user: User = Depends(get_current_user)) -> User:
             detail="The user does not have enough privileges. Admin role required."
         )
     return current_user
+
+
+def check_dean(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role not in ("admin", "dean"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="The user does not have enough privileges. Admin or Dean role required."
+        )
+    return current_user
+
+
+def check_department_head(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role not in ("admin", "department_head"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="The user does not have enough privileges. Admin or Department Head role required."
+        )
+    return current_user
+
+
+def check_teacher_or_admin(current_user: User = Depends(get_current_user)) -> User:
+    if current_user.role not in ("admin", "teacher"):
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="The user does not have enough privileges. Admin or Teacher role required."
+        )
+    return current_user

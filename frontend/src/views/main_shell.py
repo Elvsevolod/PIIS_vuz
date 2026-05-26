@@ -5,6 +5,9 @@ from views.dean_plans_view import DeanPlansView
 from views.dept_load_view import DeptLoadView
 from views.dept_diplomas_view import DeptDiplomasView
 from views.teacher_grades_view import TeacherGradesView
+from views.admin_directories_view import AdminDirectoriesView
+from views.admin_users_view import AdminUsersView
+from views.reports_view import ReportsView
 
 class MainShell(ft.Row):
     def __init__(self, page: ft.Page, on_logout):
@@ -95,6 +98,11 @@ class MainShell(ft.Row):
         # Overview (All roles)
         sidebar_items.append(
             self.create_nav_item("🧭 Обзор", ft.icons.DASHBOARD_ROUNDED, "overview", active=True)
+        )
+        
+        # Reports (All roles)
+        sidebar_items.append(
+            self.create_nav_item("📊 Отчёты", ft.icons.ANALYTICS_ROUNDED, "reports")
         )
         
         # Admin section (Admin only)
@@ -234,8 +242,14 @@ class MainShell(ft.Row):
             self.content_container.content = DeptLoadView(self.page)
         elif key == "dept_diplomas":
             self.content_container.content = DeptDiplomasView(self.page)
-        elif key == "teacher_grades":
+        elif key == "teacher_grades" or key == "teacher_load":
             self.content_container.content = TeacherGradesView(self.page)
+        elif key == "admin_directories":
+            self.content_container.content = AdminDirectoriesView(self.page)
+        elif key == "admin_users":
+            self.content_container.content = AdminUsersView(self.page)
+        elif key == "reports":
+            self.content_container.content = ReportsView(self.page)
         else:
             # Placeholder for future views
             self.content_container.content = ft.Container(

@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from psycopg2.errors import ForeignKeyViolation
 from typing import List, Optional
 
 from app.core.database import get_db
 from app.models.models import Group, Student, Faculty
 from app.schemas.schemas import GroupCreate, GroupResponse, StudentCreate, StudentResponse
-from app.api.endpoints.auth import get_current_user
+from app.api.deps import get_current_user, check_dean
 
 router = APIRouter()
 
@@ -28,7 +30,7 @@ def list_groups(db: Session = Depends(get_db), current_user = Depends(get_curren
     return results
 
 @router.post("/groups", response_model=GroupResponse, status_code=status.HTTP_201_CREATED)
-def create_group(group_in: GroupCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def create_group(group_in: GroupCreate, db: Session = Depends(get_db), current_user = Depends(check_dean)):
     # Verify faculty exists
     faculty = db.query(Faculty).filter(Faculty.id == group_in.faculty_id).first()
     if not faculty:
@@ -61,22 +63,39 @@ def create_group(group_in: GroupCreate, db: Session = Depends(get_db), current_u
     )
 
 @router.delete("/groups/{group_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_group(group_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def delete_group(group_id: int, db: Session = Depends(get_db), current_user = Depends(check_dean)):
     group = db.query(Group).filter(Group.id == group_id).first()
     if not group:
         raise HTTPException(status_code=404, detail="Group not found")
-    db.delete(group)
-    db.commit()
+    try:
+        db.delete(group)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot delete group: it has related students or study plan elements. Remove them first."
+        )
     return None
 
 
 # --- Students Endpoints ---
 
 @router.get("/", response_model=List[StudentResponse])
-def list_students(group_id: Optional[int] = None, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def list_students(
+    group_id: Optional[int] = None,
+    name: Optional[str] = None,
+    gradebook_number: Optional[str] = None,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
     query = db.query(Student)
     if group_id is not None:
         query = query.filter(Student.group_id == group_id)
+    if name:
+        query = query.filter(Student.full_name.ilike(f"%{name}%"))
+    if gradebook_number:
+        query = query.filter(Student.gradebook_number.ilike(f"%{gradebook_number}%"))
     students = query.all()
     
     results = []
@@ -91,7 +110,7 @@ def list_students(group_id: Optional[int] = None, db: Session = Depends(get_db),
     return results
 
 @router.post("/", response_model=StudentResponse, status_code=status.HTTP_201_CREATED)
-def create_student(student_in: StudentCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def create_student(student_in: StudentCreate, db: Session = Depends(get_db), current_user = Depends(check_dean)):
     # Verify group if provided
     if student_in.group_id:
         group = db.query(Group).filter(Group.id == student_in.group_id).first()
@@ -121,7 +140,7 @@ def create_student(student_in: StudentCreate, db: Session = Depends(get_db), cur
     )
 
 @router.put("/{student_id}", response_model=StudentResponse)
-def update_student(student_id: int, student_in: StudentCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def update_student(student_id: int, student_in: StudentCreate, db: Session = Depends(get_db), current_user = Depends(check_dean)):
     student = db.query(Student).filter(Student.id == student_id).first()
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
@@ -153,10 +172,17 @@ def update_student(student_id: int, student_in: StudentCreate, db: Session = Dep
     )
 
 @router.delete("/{student_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_student(student_id: int, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def delete_student(student_id: int, db: Session = Depends(get_db), current_user = Depends(check_dean)):
     student = db.query(Student).filter(Student.id == student_id).first()
     if not student:
         raise HTTPException(status_code=404, detail="Student not found")
-    db.delete(student)
-    db.commit()
+    try:
+        db.delete(student)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot delete student: they have attestations or a diploma work. Remove those first."
+        )
     return None

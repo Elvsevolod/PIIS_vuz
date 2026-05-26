@@ -15,6 +15,11 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - uis_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d uis_db"]
+      interval: 5s
+      retries: 5
+      start_period: 10s
 
   backend:
     build:
@@ -24,13 +29,14 @@ services:
     restart: always
     environment:
       - DATABASE_URL=postgresql://postgres:uis_password123@db:5432/uis_db
-      - SECRET_KEY=09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7
+      - SECRET_KEY=${SECRET_KEY}
       - ALGORITHM=HS256
       - ACCESS_TOKEN_EXPIRE_MINUTES=480
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - uis_network
     volumes:

@@ -115,7 +115,7 @@ class LoginView(ft.Container):
         self.update()
         
         # API call through api_client
-        success = api_client.login(username, password)
+        success, error_msg = api_client.login(username, password)
         
         self.progress_bar.visible = False
         self.login_btn.disabled = False
@@ -123,7 +123,7 @@ class LoginView(ft.Container):
         if success:
             self.on_login_success()
         else:
-            self.show_error("Неверное имя пользователя или пароль.")
+            self.show_error(error_msg or "Неверное имя пользователя или пароль.")
             self.update()
 
     def show_error(self, message: str):

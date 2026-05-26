@@ -1,17 +1,27 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
+from psycopg2.errors import ForeignKeyViolation
 from typing import List, Optional
 
 from app.core.database import get_db
 from app.models.models import Teacher, DepartmentAssignment, TeacherLoad, StudyPlanElement, ClassType, AcademicTitle, TeacherCategory
+from sqlalchemy.orm import joinedload
 from app.schemas.schemas import TeacherLoadCreate, TeacherLoadResponse, TeacherAssignmentValidationResponse
-from app.api.endpoints.auth import get_current_user
+from app.api.deps import get_current_user, check_department_head
 
 router = APIRouter()
 
 # Helper function to compute current workload hours for a teacher
 def get_teacher_workload(db: Session, teacher_id: int) -> int:
-    loads = db.query(TeacherLoad).filter(TeacherLoad.teacher_id == teacher_id).all()
+    loads = (
+        db.query(TeacherLoad)
+        .options(
+            joinedload(TeacherLoad.assignment).joinedload(DepartmentAssignment.study_plan_element)
+        )
+        .filter(TeacherLoad.teacher_id == teacher_id)
+        .all()
+    )
     total_hours = 0
     for l in loads:
         if l.assignment and l.assignment.study_plan_element:
@@ -68,7 +78,7 @@ def validate_teacher_assignment(db: Session, teacher_id: int, assignment_id: int
         )
         
     # Rule 4: Профессор требует ученого звания профессора
-    if category == "профессор" and title != "proffesor" and title != "профессор":
+    if category == "профессор" and title != "профессор":
         raise HTTPException(
             status_code=400,
             detail="Для назначения на должность профессора необходимо ученое звание профессора."
@@ -142,7 +152,7 @@ def list_teacher_loads(
 def create_teacher_load(
     load_in: TeacherLoadCreate,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(check_department_head)
 ):
     # 1. Run strict business rule validation
     validate_teacher_assignment(db, load_in.teacher_id, load_in.assignment_id)
@@ -180,11 +190,18 @@ def create_teacher_load(
 def delete_teacher_load(
     load_id: int,
     db: Session = Depends(get_db),
-    current_user = Depends(get_current_user)
+    current_user = Depends(check_department_head)
 ):
     load = db.query(TeacherLoad).filter(TeacherLoad.id == load_id).first()
     if not load:
         raise HTTPException(status_code=404, detail="Распределение нагрузки не найдено.")
-    db.delete(load)
-    db.commit()
+    try:
+        db.delete(load)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=409,
+            detail="Cannot delete teacher load due to existing references."
+        )
     return None
