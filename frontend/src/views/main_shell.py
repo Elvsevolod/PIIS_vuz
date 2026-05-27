@@ -31,7 +31,7 @@ class MainShell(ft.Row):
         
         # Active view label in header
         self.section_title = ft.Text(
-            value="🧭 Панель управления",
+            value="Панель управления",
             size=20,
             weight=ft.FontWeight.BOLD,
             color=ft.colors.WHITE
@@ -97,12 +97,12 @@ class MainShell(ft.Row):
         
         # Overview (All roles)
         sidebar_items.append(
-            self.create_nav_item("🧭 Обзор", ft.icons.DASHBOARD_ROUNDED, "overview", active=True)
+            self.create_nav_item("Обзор", ft.icons.DASHBOARD_ROUNDED, "overview", active=True)
         )
         
         # Reports (All roles)
         sidebar_items.append(
-            self.create_nav_item("📊 Отчёты", ft.icons.ANALYTICS_ROUNDED, "reports")
+            self.create_nav_item("Отчёты", ft.icons.ANALYTICS_ROUNDED, "reports")
         )
         
         # Admin section (Admin only)
@@ -113,8 +113,8 @@ class MainShell(ft.Row):
                     margin=ft.margin.only(top=15, left=10, bottom=5)
                 )
             )
-            sidebar_items.append(self.create_nav_item("📁 Справочники", ft.icons.FOLDER_ROUNDED, "admin_directories"))
-            sidebar_items.append(self.create_nav_item("👥 Пользователи", ft.icons.PEOPLE_ROUNDED, "admin_users"))
+            sidebar_items.append(self.create_nav_item("Справочники", ft.icons.FOLDER_ROUNDED, "admin_directories"))
+            sidebar_items.append(self.create_nav_item("Пользователи", ft.icons.PEOPLE_ROUNDED, "admin_users"))
             
         # Dean section (Dean or Admin)
         if self.role in ["admin", "dean"]:
@@ -124,8 +124,8 @@ class MainShell(ft.Row):
                     margin=ft.margin.only(top=15, left=10, bottom=5)
                 )
             )
-            sidebar_items.append(self.create_nav_item("📅 Учебные планы", ft.icons.PLAYLIST_ADD_CHECK_ROUNDED, "dean_plans"))
-            sidebar_items.append(self.create_nav_item("👨‍🎓 Группы и студенты", ft.icons.SCHOOL_ROUNDED, "dean_students"))
+            sidebar_items.append(self.create_nav_item("Учебные планы", ft.icons.PLAYLIST_ADD_CHECK_ROUNDED, "dean_plans"))
+            sidebar_items.append(self.create_nav_item("Группы и студенты", ft.icons.SCHOOL_ROUNDED, "dean_students"))
             
         # Zavkhaf section (Department Head or Admin)
         if self.role in ["admin", "department_head"]:
@@ -135,8 +135,8 @@ class MainShell(ft.Row):
                     margin=ft.margin.only(top=15, left=10, bottom=5)
                 )
             )
-            sidebar_items.append(self.create_nav_item("💼 Распределение нагрузки", ft.icons.ASSIGNMENT_IND_ROUNDED, "dept_load"))
-            sidebar_items.append(self.create_nav_item("🎓 Дипломные работы", ft.icons.ASSIGNMENT_ROUNDED, "dept_diplomas"))
+            sidebar_items.append(self.create_nav_item("Распределение нагрузки", ft.icons.ASSIGNMENT_IND_ROUNDED, "dept_load"))
+            sidebar_items.append(self.create_nav_item("Дипломные работы", ft.icons.ASSIGNMENT_ROUNDED, "dept_diplomas"))
             
         # Teacher section (Teacher or Admin)
         if self.role in ["admin", "teacher"]:
@@ -146,8 +146,8 @@ class MainShell(ft.Row):
                     margin=ft.margin.only(top=15, left=10, bottom=5)
                 )
             )
-            sidebar_items.append(self.create_nav_item("📝 Моя нагрузка", ft.icons.TASK_ROUNDED, "teacher_load"))
-            sidebar_items.append(self.create_nav_item("📊 Аттестация", ft.icons.GRADING_ROUNDED, "teacher_grades"))
+            sidebar_items.append(self.create_nav_item("Моя нагрузка", ft.icons.TASK_ROUNDED, "teacher_load"))
+            sidebar_items.append(self.create_nav_item("Аттестация", ft.icons.GRADING_ROUNDED, "teacher_grades"))
             
         # Footer spacer & Logout
         sidebar_items.append(ft.Container(expand=True))
@@ -280,9 +280,9 @@ class MainShell(ft.Row):
                     ft.Container(height=20),
                     ft.Row(
                         controls=[
-                            self.create_info_card("👨‍🎓 Студенты", "Мониторинг групп и успеваемости студентов в реальном времени.", ft.icons.PEOPLE_ROUNDED),
-                            self.create_info_card("💼 Учебная нагрузка", "Интеллектуальный контроль распределения часов и видов занятий.", ft.icons.ASSIGNMENT_IND_ROUNDED),
-                            self.create_info_card("📊 Сессия и зачеты", "Удобное выставление оценок в электронные аттестационные ведомости.", ft.icons.GRADING_ROUNDED),
+                            self.create_info_card("Студенты", "Мониторинг групп и успеваемости студентов в реальном времени.", ft.icons.PEOPLE_ROUNDED),
+                            self.create_info_card("Учебная нагрузка", "Интеллектуальный контроль распределения часов и видов занятий.", ft.icons.ASSIGNMENT_IND_ROUNDED),
+                            self.create_info_card("Сессия и зачеты", "Удобное выставление оценок в электронные аттестационные ведомости.", ft.icons.GRADING_ROUNDED),
                         ],
                         spacing=20,
                         alignment=ft.MainAxisAlignment.START
